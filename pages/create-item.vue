@@ -6,7 +6,7 @@ div.pa-10.d-flex.justify-center.flex-column.mx-auto(style="max-width:800px; widt
   v-text-field(type="number" label="Asset Price in ETH" outlined v-model="formInput.price")
   v-file-input(type="file" label="Asset" outlined @change="uploadFile()" v-model="rawFile")
   img.d-flex.mx-auto.mb-10(v-if="fileUrl"  :src="fileUrl" :alt="fileName" style="max-width:400px; width:100%;")
-  v-btn(:disabled="!fileUrl" width="100%" color="green"  @click="createMarket()" ) Create
+  v-btn(:disabled="!fileUrl || creating" width="100%" color="green"  @click="createMarket()" ) Create
        
 </template>
 
@@ -36,7 +36,8 @@ export default {
         description: "",
       },
       provider: null,
-      signer: null
+      signer: null,
+      creating: false
     }
   },
   async mounted() {
@@ -81,6 +82,8 @@ export default {
       });
     },
     async createMarket() {
+      this.creating = true;
+      
       const { name, description, price } = this.formInput;
       if (!name || !description || !price || !this.fileUrl) return;
       /* first, upload to IPFS */
@@ -106,6 +109,7 @@ export default {
         // console.log(result);
         const url = `https://nftstorage.link/ipfs/${result.value.ipnft}/metadata.json`;
         this.createSale(url);
+        this.creating = false;
       })
       .catch((error) => {
         console.error('Upload error:', error);
@@ -114,6 +118,8 @@ export default {
     },
     async createSale(url) {
       const signer = this.signer;
+
+      console.log(signer);
 
       /* next, create the item */
       let contract = new ethers.Contract(nftaddress, NFT.abi, signer);
