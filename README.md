@@ -1,4 +1,4 @@
-# Hardhat NFT Marketplace
+# My NFT Marketplace
 
 ## Requirements
 
